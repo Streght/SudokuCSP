@@ -19,6 +19,14 @@ namespace SudokuCSP
         /// Store the sudoku array.
         /// </summary>
         private Cell[,] m_aiSudokuGrid;
+        /// <summary>
+        /// Store the resolution state of the sudoku.
+        /// </summary>
+        private bool m_bSolved = false;
+        /// <summary>
+        /// Store the starting values coordinates.
+        /// </summary>
+        private List<Coordinate> m_lcStartingValuesCoordinate = new List<Coordinate>();
 
         /// <summary>
         /// Get the sudoku size.
@@ -39,6 +47,36 @@ namespace SudokuCSP
             get
             {
                 return m_aiSudokuGrid;
+            }
+        }
+        
+        /// <summary>
+        /// Get / set the resolution state.
+        /// </summary>
+        public bool Solved
+        {
+            get
+            {
+                return m_bSolved;
+            }
+            set
+            {
+                m_bSolved = value;
+            }
+        }
+
+        /// <summary>
+        /// Get / set the coordinates of the starting values.
+        /// </summary>
+        public List<Coordinate> StartingValuesCoordinate
+        {
+            get
+            {
+                return m_lcStartingValuesCoordinate;
+            }
+            set
+            {
+                m_lcStartingValuesCoordinate = value;
             }
         }
 
@@ -81,6 +119,7 @@ namespace SudokuCSP
                             if (Convert.ToInt32(asValues[i]) != 0)
                             {
                                 m_aiSudokuGrid[iIndexRead, i].Assigned = true;
+                                m_lcStartingValuesCoordinate.Add(new Coordinate(iIndexRead, i));
                             }
                         });
 
@@ -124,7 +163,39 @@ namespace SudokuCSP
                         }
                         else
                         {
-                            Console.Write(" " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                            // If the sudoku isn't solved, diplay starting value in red.
+                            if (!(m_bSolved))
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.Write(" " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                Console.ResetColor();
+                            }
+                            if (m_bSolved)
+                            {
+                                // Flag used to detect a starting value.
+                                bool bFlagStartingValue = false;
+
+                                //for (int k = 0; k < m_lcStartingValuesCoordinate.Count; k++)
+                                Parallel.For(0, m_lcStartingValuesCoordinate.Count, k =>
+                                {
+                                    // Test if the value to display is one of the starting value -> display in red.
+                                    if (m_lcStartingValuesCoordinate[k].Row == i && m_lcStartingValuesCoordinate[k].Column == j)
+                                    {
+                                        Console.ForegroundColor = ConsoleColor.Red;
+                                        Console.Write(" " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                        Console.ResetColor();
+                                        bFlagStartingValue = true;
+                                    }
+                                });
+
+                                // If the value to display isn't a starting value, display it in green.
+                                if (!(bFlagStartingValue))
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.Write(" " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                    Console.ResetColor();
+                                }
+                            }
                         }
                     }
                     Console.Write(" |\n");

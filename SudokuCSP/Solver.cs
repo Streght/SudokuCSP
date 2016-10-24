@@ -44,6 +44,7 @@ namespace SudokuCSP
                     }
                 }
             }
+            p_sSudoku.Solved = true;
             return true;
         }
 
@@ -63,6 +64,8 @@ namespace SudokuCSP
                     sSudokuCopy.SudokuGrid[i, j] = new Cell(p_sSudokuToCopy.SudokuGrid[i, j]);
                 }
             }
+            sSudokuCopy.StartingValuesCoordinate = p_sSudokuToCopy.StartingValuesCoordinate;
+
             return sSudokuCopy;
         }
 
