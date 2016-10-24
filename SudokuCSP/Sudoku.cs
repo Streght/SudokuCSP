@@ -19,10 +19,6 @@ namespace SudokuCSP
         /// Store the sudoku array.
         /// </summary>
         private Cell[,] m_aiSudokuGrid;
-        /// <summary>
-        /// The remaining unknown values.
-        /// </summary>
-        private int m_iRemainingZeros;
 
         /// <summary>
         /// Get the sudoku size.
@@ -47,40 +43,25 @@ namespace SudokuCSP
         }
 
         /// <summary>
-        /// Get / set the number of missing numbers.
-        /// </summary>
-        public int RemainingZeros
-        {
-            get
-            {
-                return m_iRemainingZeros;
-            }
-            set
-            {
-                m_iRemainingZeros = value;
-            }
-        }
-
-        /// <summary>
         /// Create a new SudokuSolver.
         /// </summary>
-        private Sudoku()
+        public Sudoku()
         {
             m_aiSudokuGrid = new Cell[m_iSudokuSize, m_iSudokuSize];
 
             for (int i = 0; i < m_iSudokuSize; i++)
             {
-                Parallel.For(0, m_iSudokuSize, j =>
+                for (int j = 0; j < m_iSudokuSize; j++)
                 {
                     m_aiSudokuGrid[i, j] = new Cell();
-                });
+                }
             }
         }
 
         /// <summary>
         /// Read the CSV file provided.
         /// </summary>
-        private void ReadCSV(string p_sPath)
+        public void ReadCSV(string p_sPath)
         {
             try
             {
@@ -97,9 +78,9 @@ namespace SudokuCSP
                         Parallel.For(0, m_iSudokuSize, i =>
                         {
                             m_aiSudokuGrid[iIndexRead, i].CellValue = Convert.ToInt32(asValues[i]);
-                            if (Convert.ToInt32(asValues[i]) == 0)
+                            if (Convert.ToInt32(asValues[i]) != 0)
                             {
-                                m_iRemainingZeros++;
+                                m_aiSudokuGrid[iIndexRead, i].Assigned = true;
                             }
                         });
 
@@ -111,17 +92,20 @@ namespace SudokuCSP
             {
                 Console.WriteLine("The CSV file could not be read:");
                 Console.WriteLine(e.Message + "\n");
+
+                Console.Write("Please enter the name of the sudoku to solve (without the extension) and press enter.\n");
+                string sSudokuName = Console.ReadLine();
+                ReadCSV(@"SudokuGrid\" + sSudokuName + ".csv");
             }
         }
 
         /// <summary>
         /// Print the stored sudoku grid in the console.
         /// </summary>
-        private void PrintSudokuGrid()
+        public void PrintSudokuGrid()
         {
             if (m_aiSudokuGrid != null)
             {
-                Console.Write("Grille de Sudoku stockée :\n");
                 for (int i = 0; i < m_iSudokuSize; i++)
                 {
                     if (i % Math.Sqrt(m_iSudokuSize) == 0)
@@ -158,13 +142,14 @@ namespace SudokuCSP
         private List<int> ComputePossibleValues(int p_iRow, int p_iColumn)
         {
             List<int> liConstraintValues = new List<int>();
+
             for (int i = 0; i < m_aiSudokuGrid[p_iRow, p_iColumn].Peers.Count; i++)
             {
-                liConstraintValues.Add(m_aiSudokuGrid[p_iRow, p_iColumn].Peers[i].CellValue);
+                liConstraintValues.Add(m_aiSudokuGrid[m_aiSudokuGrid[p_iRow, p_iColumn].Peers[i].Row, m_aiSudokuGrid[p_iRow, p_iColumn].Peers[i].Column].CellValue);
             }
 
             List<int> liPossibleValues = new List<int>();
-            //for (int i = 0; i < m_iSudokuSize; i++)
+
             Parallel.For(0, m_iSudokuSize, i =>
             {
                 if (!(liConstraintValues.Contains(i + 1)))
@@ -177,69 +162,68 @@ namespace SudokuCSP
         }
 
         /// <summary>
-        /// Return the row and column peers for a given cell.
+        /// Return the row and column peers' coordinates for a given cell.
         /// </summary>
         /// <param name="p_iRow"> The row of the given cell. </param>
         /// <param name="p_iColumn"> The column of the given cell. </param>
-        /// <returns> The row and column peers as a list. </returns>
-        private List<Cell> ComputeRowAndColumnPeers(int p_iRow, int p_iColumn)
+        /// <returns> The row and column peers' coordinates as a list. </returns>
+        private List<Coordinate> ComputeRowAndColumnPeers(int p_iRow, int p_iColumn)
         {
-            List<Cell> lcRowPeers = new List<Cell>();
-            List<Cell> lcColumnPeers = new List<Cell>();
+            List<Coordinate> lcRowPeers = new List<Coordinate>();
+            List<Coordinate> lcColumnPeers = new List<Coordinate>();
 
-            for (int i = 0; i < m_iSudokuSize; i++)
+            Parallel.For(0, m_iSudokuSize, i =>
             {
                 if (i != p_iColumn)
                 {
-                    lcRowPeers.Add(m_aiSudokuGrid[p_iRow, i]);
+                    lcRowPeers.Add(new Coordinate(p_iRow, i));
                 }
                 if (i != p_iRow)
                 {
-                    lcColumnPeers.Add(m_aiSudokuGrid[i, p_iColumn]);
+                    lcColumnPeers.Add(new Coordinate(i, p_iColumn));
                 }
-            }
+            });
 
             lcRowPeers.AddRange(lcColumnPeers);
             return lcRowPeers;
         }
 
         /// <summary>
-        /// Return the region peers for a given cell.
+        /// Return the region peers' coordinates for a given cell.
         /// </summary>
         /// <param name="p_iRow"> The row of the given cell. </param>
         /// <param name="p_iColumn"> The column of the given cell. </param>
-        /// <returns> The region peers as a list. </returns>
-        private List<Cell> ComputeRegionPeers(int p_iRow, int p_iColumn)
+        /// <returns> The region peers' coordinates as a list. </returns>
+        private List<Coordinate> ComputeRegionPeers(int p_iRow, int p_iColumn)
         {
-            List<Cell> lcResult = new List<Cell>();
-            int iRowPosition = p_iRow % 3;
-            int iColumnPosition = p_iColumn % 3;
+            List<Coordinate> lcResult = new List<Coordinate>();
+            int iRowPosition = p_iRow % (int)Math.Sqrt(m_iSudokuSize);
+            int iColumnPosition = p_iColumn % (int)Math.Sqrt(m_iSudokuSize);
 
             switch (iRowPosition)
             {
                 case 0:
-
                     switch (iColumnPosition)
                     {
                         case 0:
-                            List<Cell> lcPeers00 = new List<Cell> { m_aiSudokuGrid[p_iRow + 1, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn + 2],
-                                m_aiSudokuGrid[p_iRow + 2, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow + 2, p_iColumn + 2] };
+                            List<Coordinate> lcPeers00 = new List<Coordinate> { new Coordinate(p_iRow + 1, p_iColumn + 1),
+                                new Coordinate(p_iRow + 1, p_iColumn + 2),
+                                new Coordinate(p_iRow + 2, p_iColumn + 1),
+                                new Coordinate(p_iRow + 2, p_iColumn + 2) };
                             lcResult.AddRange(lcPeers00);
                             break;
                         case 1:
-                            List<Cell> lcPeers01 = new List<Cell> { m_aiSudokuGrid[p_iRow + 1, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow + 2, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow + 2, p_iColumn + 1] };
+                            List<Coordinate> lcPeers01 = new List<Coordinate> { new Coordinate(p_iRow + 1, p_iColumn - 1),
+                                new Coordinate(p_iRow + 1, p_iColumn + 1),
+                                new Coordinate(p_iRow + 2, p_iColumn - 1),
+                                new Coordinate(p_iRow + 2, p_iColumn + 1) };
                             lcResult.AddRange(lcPeers01);
                             break;
                         case 2:
-                            List<Cell> lcPeers02 = new List<Cell> { m_aiSudokuGrid[p_iRow + 1, p_iColumn - 2],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow + 2, p_iColumn - 2],
-                                m_aiSudokuGrid[p_iRow + 2, p_iColumn - 1] };
+                            List<Coordinate> lcPeers02 = new List<Coordinate> { new Coordinate(p_iRow + 1, p_iColumn - 2),
+                                new Coordinate(p_iRow + 1, p_iColumn - 1),
+                                new Coordinate(p_iRow + 2, p_iColumn - 2),
+                                new Coordinate(p_iRow + 2, p_iColumn - 1) };
                             lcResult.AddRange(lcPeers02);
                             break;
                         default:
@@ -250,24 +234,24 @@ namespace SudokuCSP
                     switch (iColumnPosition)
                     {
                         case 0:
-                            List<Cell> lcPeers10 = new List<Cell> { m_aiSudokuGrid[p_iRow -1, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn + 2],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn + 2] };
+                            List<Coordinate> lcPeers10 = new List<Coordinate> { new Coordinate(p_iRow -1, p_iColumn + 1),
+                                new Coordinate(p_iRow - 1, p_iColumn + 2),
+                                new Coordinate(p_iRow + 1, p_iColumn + 1),
+                                new Coordinate(p_iRow + 1, p_iColumn + 2) };
                             lcResult.AddRange(lcPeers10);
                             break;
                         case 1:
-                            List<Cell> lcPeers11 = new List<Cell> { m_aiSudokuGrid[p_iRow - 1, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn + 1] };
+                            List<Coordinate> lcPeers11 = new List<Coordinate> { new Coordinate(p_iRow - 1, p_iColumn - 1),
+                                new Coordinate(p_iRow - 1, p_iColumn + 1),
+                                new Coordinate(p_iRow + 1, p_iColumn - 1),
+                                new Coordinate(p_iRow + 1, p_iColumn + 1) };
                             lcResult.AddRange(lcPeers11);
                             break;
                         case 2:
-                            List<Cell> lcPeers12 = new List<Cell> { m_aiSudokuGrid[p_iRow - 1, p_iColumn - 2],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn - 2],
-                                m_aiSudokuGrid[p_iRow + 1, p_iColumn - 1] };
+                            List<Coordinate> lcPeers12 = new List<Coordinate> { new Coordinate(p_iRow - 1, p_iColumn - 2),
+                                new Coordinate(p_iRow - 1, p_iColumn - 1),
+                                new Coordinate(p_iRow + 1, p_iColumn - 2),
+                                new Coordinate(p_iRow + 1, p_iColumn - 1) };
                             lcResult.AddRange(lcPeers12);
                             break;
                         default:
@@ -278,24 +262,24 @@ namespace SudokuCSP
                     switch (iColumnPosition)
                     {
                         case 0:
-                            List<Cell> lcPeers20 = new List<Cell> { m_aiSudokuGrid[p_iRow - 2, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow - 2, p_iColumn + 2],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn + 2] };
+                            List<Coordinate> lcPeers20 = new List<Coordinate> { new Coordinate(p_iRow - 2, p_iColumn + 1),
+                                new Coordinate(p_iRow - 2, p_iColumn + 2),
+                                new Coordinate(p_iRow - 1, p_iColumn + 1),
+                                new Coordinate(p_iRow - 1, p_iColumn + 2) };
                             lcResult.AddRange(lcPeers20);
                             break;
                         case 1:
-                            List<Cell> lcPeers21 = new List<Cell> { m_aiSudokuGrid[p_iRow - 2, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow - 2, p_iColumn + 1],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn + 1] };
+                            List<Coordinate> lcPeers21 = new List<Coordinate> { new Coordinate(p_iRow - 2, p_iColumn - 1),
+                                new Coordinate(p_iRow - 2, p_iColumn + 1),
+                                new Coordinate(p_iRow - 1, p_iColumn - 1),
+                                new Coordinate(p_iRow - 1, p_iColumn + 1) };
                             lcResult.AddRange(lcPeers21);
                             break;
                         case 2:
-                            List<Cell> lcPeers22 = new List<Cell> { m_aiSudokuGrid[p_iRow - 2, p_iColumn - 2],
-                                m_aiSudokuGrid[p_iRow - 2, p_iColumn - 1],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn - 2],
-                                m_aiSudokuGrid[p_iRow - 1, p_iColumn - 1] };
+                            List<Coordinate> lcPeers22 = new List<Coordinate> { new Coordinate(p_iRow - 2, p_iColumn - 2),
+                                new Coordinate(p_iRow - 2, p_iColumn - 1),
+                                new Coordinate(p_iRow - 1, p_iColumn - 2),
+                                new Coordinate(p_iRow - 1, p_iColumn - 1) };
                             lcResult.AddRange(lcPeers22);
                             break;
                         default:
@@ -309,67 +293,27 @@ namespace SudokuCSP
         }
 
         /// <summary>
-        /// Initialise the sudoku by finding the peers and possible values for each cell.
+        /// Initialise the sudoku by finding the peers' coordinates and possible values for each cell.
         /// </summary>
-        private void InitSudoku()
+        public void InitSudoku()
         {
             for (int i = 0; i < m_iSudokuSize; i++)
             {
                 for (int j = 0; j < m_iSudokuSize; j++)
                 {
-                    List<Cell> lcPeers = new List<Cell>();
+                    List<Coordinate> lcPeers = new List<Coordinate>();
                     lcPeers.AddRange(ComputeRowAndColumnPeers(i, j));
                     lcPeers.AddRange(ComputeRegionPeers(i, j));
                     m_aiSudokuGrid[i, j].Peers.AddRange(lcPeers);
 
-                    if (m_aiSudokuGrid[i, j].CellValue == 0)
+                    if (!(m_aiSudokuGrid[i, j].Assigned))
                     {
-                        List<int> lcPossibleValues = new List<int>();
-                        lcPossibleValues.AddRange(ComputePossibleValues(i, j));
-                        m_aiSudokuGrid[i, j].PossibleValues.AddRange(lcPossibleValues);
+                        List<int> liPossibleValues = new List<int>();
+                        liPossibleValues.AddRange(ComputePossibleValues(i, j));
+                        m_aiSudokuGrid[i, j].PossibleValues.AddRange(liPossibleValues);
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Remove a value from the peers of a given cell.
-        /// </summary>
-        /// <param name="p_iRow"> The row of the given cell. </param>
-        /// <param name="p_iColumn"> The column of the given cell. </param>
-        /// <param name="p_iValue"> The value to be removed from the peers' possible values. </param>
-        public void RemoveValueFromPeers(int p_iRow, int p_iColumn, int p_iValue)
-        {
-            for (int i = 0; i < m_aiSudokuGrid[p_iRow, p_iColumn].Peers.Count; i++)
-            {
-                if (m_aiSudokuGrid[p_iRow, p_iColumn].Peers[i].PossibleValues.Contains(p_iValue))
-                {
-                    m_aiSudokuGrid[p_iRow, p_iColumn].Peers[i].PossibleValues.Remove(p_iValue);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Run the main program.
-        /// </summary>
-        /// <param name="args">  </param>
-        public static void Main(string[] args)
-        {
-            Sudoku mpSudokuSolver = new Sudoku();
-            mpSudokuSolver.ReadCSV(@"SudokuGrid\sudoku0.csv");
-            mpSudokuSolver.PrintSudokuGrid();
-            Console.Write("Start solving ? Press enter...\n");
-            Console.ReadKey(true);
-
-            mpSudokuSolver.InitSudoku();
-            Solver.FillWithObviousValues(mpSudokuSolver);
-
-            Console.Write("\n");
-            mpSudokuSolver.PrintSudokuGrid();
-            Console.ReadKey(true);
-
-            int a = 0;
-            a++;
         }
 
     }
