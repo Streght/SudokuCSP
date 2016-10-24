@@ -22,10 +22,10 @@ namespace SudokuCSP
 
                 // Get the grid name from the console and 
                 Console.Write("Please enter the name of the sudoku to solve (without the extension) and press enter.\n");
-                string sSudokuName = Console.ReadLine();
-                sSudoku.ReadCSV(@"SudokuGrid\" + sSudokuName + ".csv");
+                //string sSudokuName = Console.ReadLine();
+                //sSudoku.ReadCSV(@"SudokuGrid\" + sSudokuName + ".csv");
                 // For quick tests purposes.
-                //sSudoku.ReadCSV(@"SudokuGrid\sudokuHardest.csv");
+                sSudoku.ReadCSV(@"SudokuGrid\sudokuHardest.csv");
 
                 // Display the starting sudoku on the console.
                 Console.Write("\nStarting sudoku grid :\n");
@@ -52,6 +52,7 @@ namespace SudokuCSP
                     Console.WriteLine("\nTime to find error : " + lTimeElapsed + " milliseconds.");
                     // Display the number of backtrack required to solve the sudoku.
                     Console.WriteLine("Number of backtrack : " + Solver.BacktrackNumber.ToString() + ".");
+                    Solver.BacktrackNumber = 0;
                     Console.WriteLine("\nPress enter to solve another sudoku.\n");
                     Console.ReadKey(true);
                 }
@@ -64,6 +65,7 @@ namespace SudokuCSP
                     Console.WriteLine("\nTime to solve Sudoku : " + lTimeElapsed + " milliseconds.");
                     // Display the number of backtrack required to solve the sudoku.
                     Console.WriteLine("\nNumber of backtrack : " + Solver.BacktrackNumber.ToString() + ".");
+                    Solver.BacktrackNumber = 0;
                     Console.WriteLine("\nPress enter to solve another sudoku.\n");
                     Console.ReadKey(true);
                 }
