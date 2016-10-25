@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace SudokuCSP
 {
+    /// <summary>
+    /// Run the console interface to interact with the user.
+    /// </summary>
     public class MainProgram
     {
         /// <summary>
@@ -22,15 +25,14 @@ namespace SudokuCSP
 
                 // Get the grid name from the console and 
                 Console.Write("Please enter the name of the sudoku to solve (without the extension) and press enter.\n");
-                //string sSudokuName = Console.ReadLine();
-                //sSudoku.ReadCSV(@"SudokuGrid\" + sSudokuName + ".csv");
+                string sSudokuName = Console.ReadLine();
+                sSudoku.ReadCSV(@"SudokuGrid\" + sSudokuName + ".csv");
                 // For quick tests purposes.
-                sSudoku.ReadCSV(@"SudokuGrid\sudokuHardest.csv");
+                //sSudoku.ReadCSV(@"SudokuGrid\sudokuHardest.csv");
 
                 // Display the starting sudoku on the console.
                 Console.Write("\nStarting sudoku grid :\n");
                 sSudoku.PrintSudokuGrid();
-                sSudoku.InitSudoku();
                 Console.Write("Start solving ? Press enter...\n");
                 Console.ReadKey(true);
 

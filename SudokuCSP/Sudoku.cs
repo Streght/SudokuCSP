@@ -126,6 +126,7 @@ namespace SudokuCSP
                         iIndexRead++;
                     }
                 }
+                InitSudoku();
             }
             catch (Exception e)
             {
@@ -366,7 +367,7 @@ namespace SudokuCSP
         /// <summary>
         /// Initialise the sudoku by finding the peers' coordinates and possible values for each cell.
         /// </summary>
-        public void InitSudoku()
+        private void InitSudoku()
         {
             for (int i = 0; i < m_iSudokuSize; i++)
             {
