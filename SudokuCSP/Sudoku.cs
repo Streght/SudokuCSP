@@ -5,20 +5,20 @@ using System.IO;
 namespace SudokuCSP
 {
     /// <summary>
-    /// Console class used to solve a provided sudoku.
+    /// Console class used to solve a provided Sudoku.
     /// </summary>
     public class Sudoku
     {
         /// <summary>
-        /// Set the sudoku size.
+        /// Set the Sudoku size.
         /// </summary>
         private int m_iSudokuSize = 9;
         /// <summary>
-        /// Store the sudoku array.
+        /// Store the Sudoku array.
         /// </summary>
         private Cell[,] m_aiSudokuGrid;
         /// <summary>
-        /// Store the resolution state of the sudoku.
+        /// Store the resolution state of the Sudoku.
         /// </summary>
         private bool m_bSolved = false;
         /// <summary>
@@ -31,7 +31,7 @@ namespace SudokuCSP
         private List<int> m_liPossibleValueAtStart = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
         /// <summary>
-        /// Get the sudoku size.
+        /// Get the Sudoku size.
         /// </summary>
         public int SudokuSize
         {
@@ -42,7 +42,7 @@ namespace SudokuCSP
         }
 
         /// <summary>
-        /// Get the sudoku grid.
+        /// Get the Sudoku grid.
         /// </summary>
         public Cell[,] SudokuGrid
         {
@@ -135,14 +135,14 @@ namespace SudokuCSP
                 Console.WriteLine("The CSV file could not be read:");
                 Console.WriteLine(e.Message + "\n");
 
-                Console.Write("Please enter the name of the sudoku to solve (without the extension) and press enter.\n");
+                Console.Write("Please enter the name of the Sudoku to solve (without the extension) and press enter.\n");
                 string sSudokuName = Console.ReadLine();
                 ReadCSV(@"SudokuGrid\" + sSudokuName + ".csv");
             }
         }
 
         /// <summary>
-        /// Print the stored sudoku grid in the console.
+        /// Print the stored Sudoku grid in the console.
         /// </summary>
         public void PrintSudokuGrid()
         {
@@ -166,7 +166,7 @@ namespace SudokuCSP
                         }
                         else
                         {
-                            // If the sudoku isn't solved, diplay starting value in red.
+                            // If the Sudoku isn't solved, diplay starting value in red.
                             if (!(m_bSolved))
                             {
                                 Console.ForegroundColor = ConsoleColor.Red;
@@ -338,7 +338,7 @@ namespace SudokuCSP
         }
 
         /// <summary>
-        /// Initialise the sudoku by finding the peers' coordinates and filling the list of possible values for the unassigned cells.
+        /// Initialise the Sudoku by finding the peers' coordinates and filling the list of possible values for the unassigned cells.
         /// </summary>
         private void InitSudoku()
         {

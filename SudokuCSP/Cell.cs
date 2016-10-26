@@ -3,7 +3,7 @@
 namespace SudokuCSP
 {
     /// <summary>
-    /// Class used to represent a sudoku cell. It is composed of the following :
+    /// Class used to represent a Sudoku cell. It is composed of the following :
     /// - m_iCellValue which is the current value of the cell. It equals 0 if the cell doesn't have any value.
     /// - m_liPossibleValues which is the list of possible value for the current cell. It is empty if the cell has a m_iCellValue different from zero.
     /// - m_lcPeers which is the list of the peers' coordinates for the current cell, i.e. the coordinate of the cells in the same row / column / region.

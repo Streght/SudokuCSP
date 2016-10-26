@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace SudokuCSP
 {
     /// <summary>
-    /// Static class containing the method to solve the sudoku.
+    /// Static class containing the method to solve the Sudoku.
     /// </summary>
     public static class Solver
     {
@@ -33,7 +32,7 @@ namespace SudokuCSP
         /// <summary>
         /// Solve a given Sudoku using the Backtracking Search.
         /// </summary>
-        /// <param name="p_sSudokuToSolve"> The sudoku to solve. </param>
+        /// <param name="p_sSudokuToSolve"> The Sudoku to solve. </param>
         /// <returns> The Sudoku solved, null otherwise. </returns>
         public static Sudoku SolveSudoku(Sudoku p_sSudokuToSolve)
         {
@@ -41,10 +40,10 @@ namespace SudokuCSP
         }
 
         /// <summary>
-        /// Check if the sudoku is solved, i.e. if every cell has been assigned.
+        /// Check if the Sudoku is solved, i.e. if every cell has been assigned.
         /// </summary>
-        /// <param name="p_sSudoku"> The sudoku to consider. </param>
-        /// <returns> True if the sudoku is solved, false otherwise. </returns>
+        /// <param name="p_sSudoku"> The Sudoku to consider. </param>
+        /// <returns> True if the Sudoku is solved, false otherwise. </returns>
         private static bool IsSolved(Sudoku p_sSudoku)
         {
             for (int i = 0; i < p_sSudoku.SudokuSize; i++)
@@ -57,16 +56,15 @@ namespace SudokuCSP
                     }
                 }
             }
-
             p_sSudoku.Solved = true;
             return true;
         }
 
         /// <summary>
-        /// Return a copy of a given sudoku (used for backtrack Search).
+        /// Return a copy of a given Sudoku (used for backtrack Search).
         /// </summary>
-        /// <param name="p_sSudokuToCopy"> The sudoku to copy. </param>
-        /// <returns> A copy of the given sudoku. </returns>
+        /// <param name="p_sSudokuToCopy"> The Sudoku to copy. </param>
+        /// <returns> A copy of the given Sudoku. </returns>
         private static Sudoku Clone(Sudoku p_sSudokuToCopy)
         {
             Sudoku sSudokuCopied = new Sudoku();
@@ -137,9 +135,9 @@ namespace SudokuCSP
         /// <summary>
         /// Look for the cell with a minimum number of possible values and return the first one found.
         /// </summary>
-        /// <param name="p_sSudoku"> The sudoku to consider. </param>
+        /// <param name="p_sSudoku"> The Sudoku to consider. </param>
         /// <returns> The first cell with a minimum number of possible values. </returns>
-        private static Coordinate MinimumRemainingValue(Sudoku p_sSudoku)
+        private static Coordinate CellWithMinimumRemainingValue(Sudoku p_sSudoku)
         {
             int iCurrentMinPossibleValue = p_sSudoku.SudokuSize + 1;
             Coordinate cResult = new Coordinate();
@@ -162,7 +160,7 @@ namespace SudokuCSP
         /// <summary>
         /// Return the first item of the list of possible value for a given cell.
         /// </summary>
-        /// <param name="p_sSudoku"> The sudoku to consider. </param>
+        /// <param name="p_sSudoku"> The Sudoku to consider. </param>
         /// <param name="p_cCellCoordinate"> The cell coordinates.  </param>
         /// <returns> The first item of the list of possible value for a given cell. </returns>
         private static int FirstPossibleValue(Sudoku p_sSudoku, Coordinate p_cCellCoordinate)
@@ -171,12 +169,12 @@ namespace SudokuCSP
         }
 
         /// <summary>
-        /// Return the item in the list of possible value which appear the least in the peers' possible values.
+        /// Return the item in the list of possible value which appear the most in the peers' possible values.
         /// </summary>
-        /// <param name="p_sSudoku"> The sudoku to consider. </param>
+        /// <param name="p_sSudoku"> The Sudoku to consider. </param>
         /// <param name="p_cCellCoordinate"> The cell coordinates. </param>
-        /// <returns> The item in the list of possible value which appear the least in the peers' possible values. </returns>
-        private static int ValueWithLeastConstraint(Sudoku p_sSudoku, Coordinate p_cCellCoordinate)
+        /// <returns> The item in the list of possible value which appear the most in the peers' possible values. </returns>
+        private static int ValueWithMaxConstraints(Sudoku p_sSudoku, Coordinate p_cCellCoordinate)
         {
             int[] aiConstraintCountForValues = new int[p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].PossibleValues.Count];
 
@@ -193,83 +191,98 @@ namespace SudokuCSP
                 }
             }
             return p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].PossibleValues[aiConstraintCountForValues.ToList().IndexOf(
-                aiConstraintCountForValues.ToList().Min())];
+                aiConstraintCountForValues.ToList().Max())];
         }
 
         /// <summary>
-        /// Remove value with the ForwardChecking method for a given cell, i.e. remove the value from the list of possible values of the cell.
+        /// Remove value p_iValue from the list of possible values of a given cell.
         /// </summary>
-        /// <param name="p_sSudoku"> The sudoku to consider. </param>
-        /// <param name="p_cCoordinate"> The coordinates of the cell. </param>
-        /// <param name="p_iValue"> The value to remove from the list of possible values if the cell. </param>
-        /// <returns> The sudoku where the list of possible values of the cell has been updated. </returns>
-        private static Sudoku RemoveValueFC(Sudoku p_sSudoku, Coordinate p_cCoordinate, int p_iValue)
+        /// <param name="p_sSudoku"> The Sudoku to consider. </param>
+        /// <param name="p_cCoordinate"> The coordinates of the given cell. </param>
+        /// <param name="p_iValue"> The value to remove from the list of possible values of the cell. </param>
+        /// <returns> The Sudoku where the list of possible values of the cell has been updated. </returns>
+        private static Sudoku RemoveValueFromPossibleValues(Sudoku p_sSudoku, Coordinate p_cCoordinate, int p_iValue)
         {
-            p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].PossibleValues.Remove(p_iValue);
+            if (!(p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Assigned))
+            {
+                p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].PossibleValues.Remove(p_iValue);
+            }
             return p_sSudoku;
         }
 
         /// <summary>
-        /// Assign p_iValue to the cell with the coordinates p_cCoordinate and remove the value with the ForwardChecking method from the peers' list of possible values.
+        /// Assign p_iValue to the cell with the coordinates p_cCoordinate and remove the value 
+        /// with the ForwardChecking method from the peers' list of possible values.
         /// </summary>
-        /// <param name="p_sSudoku"> The sudoku to consider </param>
+        /// <param name="p_sSudoku"> The Sudoku to consider </param>
         /// <param name="p_cCoordinate"> The coordinates of the cell considered. </param>
         /// <param name="p_iValue"> The value to give to the cell and to remove from the peers' list of possible values </param>
-        /// <returns> The sudoku with the cell value changed and the peers' list of possible values updated. </returns>
-        private static Sudoku AssignValueFC(Sudoku p_sSudoku, Coordinate p_cCoordinate, int p_iValue)
+        /// <returns> The Sudoku with the cell value changed and the peers' list of possible values updated. </returns>
+        private static Sudoku AssignValueWithForwardChecking(Sudoku p_sSudoku, Coordinate p_cCoordinate, int p_iValue)
         {
             for (int i = 0; i < p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers.Count; i++)
             {
-                p_sSudoku.SudokuGrid[p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Row,
-                        p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Column].PossibleValues.Remove(p_iValue);
-                // Check if a peers has its list of possible value empty and has no value assigned, i.e. need to backtrack.
-                if (p_sSudoku.SudokuGrid[p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Row,
-                        p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Column].PossibleValues.Count == 0 &&
-                        p_sSudoku.SudokuGrid[p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Row,
-                        p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Column].Assigned == false)
+                // We remove the given value from the peers' list of possible values.
+                p_sSudoku = RemoveValueFromPossibleValues(p_sSudoku, p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i], p_iValue);
+                // Check if a peer has its list of possible value empty and has no value assigned, i.e. need to backtrack.
+                if ((p_sSudoku.SudokuGrid[p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Row,
+                        p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Column].PossibleValues.Count == 0) &&
+                        (p_sSudoku.SudokuGrid[p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Row,
+                        p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Peers[i].Column].Assigned == false))
                 {
                     return null;
                 }
             }
+            // If the value doesn't leave a peer without possible value, assign this value to the given cell.
             p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].CellValue = p_iValue;
             p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Assigned = true;
             return p_sSudoku;
         }
 
         /// <summary>
-        /// Run a backtracking search on a given sudoku.
+        /// Run a backtracking search on a given Sudoku.
         /// </summary>
-        /// <param name="p_sSudokuToSolve"> The sudoku to solve. </param>
-        /// <returns> The resulting sudoku, solved or not. </returns>
-        public static Sudoku BacktrackingSearch(Sudoku p_sSudokuToSolve)
+        /// <param name="p_sSudokuToSolve"> The Sudoku to solve. </param>
+        /// <returns> The resulting Sudoku if solved, null otherwise. </returns>
+        private static Sudoku BacktrackingSearch(Sudoku p_sSudokuToSolve)
         {
-            Sudoku sSudoku;
-
+            // Handles the case of backtracking.
             if (p_sSudokuToSolve == null)
             {
                 return null;
             }
+            // Variable to store the backtracking result.
+            Sudoku sBacktrackResultingSudoku = null;
+            // If the Sudoku is solved, return the result.
             if (IsSolved(p_sSudokuToSolve))
             {
                 return p_sSudokuToSolve;
             }
-
-            Coordinate cUnassignedVariableCoord = MinimumRemainingValue(p_sSudokuToSolve);
-
+            // Find the cell with the smallest list of possible values.
+            Coordinate cUnassignedVariableCoord = CellWithMinimumRemainingValue(p_sSudokuToSolve);
+            // As long as we have some values in the list of possible values, we keep going deeper in the tree.
             while (p_sSudokuToSolve.SudokuGrid[cUnassignedVariableCoord.Row, cUnassignedVariableCoord.Column].PossibleValues.Count > 0)
             {
-                int iValue = ValueWithLeastConstraint(p_sSudokuToSolve, cUnassignedVariableCoord);
+                // In the list of possible values of the chosen cell, get the one with the most constraint from peers. 
+                int iValue = ValueWithMaxConstraints(p_sSudokuToSolve, cUnassignedVariableCoord);
+
+                // If the value with most constraints is consistent with the assignement, i.e. if not present in a peer's cell value.
                 if (ComputePossibleValues(p_sSudokuToSolve, cUnassignedVariableCoord).Contains(iValue))
                 {
-                    sSudoku = BacktrackingSearch(AssignValueFC(Clone(p_sSudokuToSolve), cUnassignedVariableCoord, iValue));
-                    if (sSudoku != null)
+                    // Run a backtracking search with this new cell value and with the peers' value updated.
+                    sBacktrackResultingSudoku = BacktrackingSearch(AssignValueWithForwardChecking(Clone(p_sSudokuToSolve), cUnassignedVariableCoord, iValue));
+                    // Used to backtrack once the solution is found.
+                    if (sBacktrackResultingSudoku != null)
                     {
-                        return sSudoku;
+                        return sBacktrackResultingSudoku;
                     }
                 }
-
+                
+                // if the peers update failed, i.e. if one peer is not assigned and has no possible values remaining.
+                // m_iBacktrackNumber is used to keep track of the count of backtracks.
                 m_iBacktrackNumber++;
-                p_sSudokuToSolve = RemoveValueFC(p_sSudokuToSolve, cUnassignedVariableCoord, iValue);
+                // Remove the most constrained value from the list of possible values. 
+                p_sSudokuToSolve = RemoveValueFromPossibleValues(p_sSudokuToSolve, cUnassignedVariableCoord, iValue);
             }
             return null;
         }
