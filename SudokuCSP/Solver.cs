@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace SudokuCSP
 {
@@ -28,11 +31,21 @@ namespace SudokuCSP
         }
 
         /// <summary>
+        /// Solve a given Sudoku using the Backtracking Search.
+        /// </summary>
+        /// <param name="p_sSudokuToSolve"> The sudoku to solve. </param>
+        /// <returns> The Sudoku solved, null otherwise. </returns>
+        public static Sudoku SolveSudoku(Sudoku p_sSudokuToSolve)
+        {
+            return BacktrackingSearch(p_sSudokuToSolve);
+        }
+
+        /// <summary>
         /// Check if the sudoku is solved, i.e. if every cell has been assigned.
         /// </summary>
         /// <param name="p_sSudoku"> The sudoku to consider. </param>
         /// <returns> True if the sudoku is solved, false otherwise. </returns>
-        private static bool IsFinished(Sudoku p_sSudoku)
+        private static bool IsSolved(Sudoku p_sSudoku)
         {
             for (int i = 0; i < p_sSudoku.SudokuSize; i++)
             {
@@ -44,29 +57,81 @@ namespace SudokuCSP
                     }
                 }
             }
+
             p_sSudoku.Solved = true;
             return true;
         }
 
         /// <summary>
-        /// Return a copy of a given sudoku (used for backtrackSearch).
+        /// Return a copy of a given sudoku (used for backtrack Search).
         /// </summary>
         /// <param name="p_sSudokuToCopy"> The sudoku to copy. </param>
         /// <returns> A copy of the given sudoku. </returns>
         private static Sudoku Clone(Sudoku p_sSudokuToCopy)
         {
-            Sudoku sSudokuCopy = new Sudoku();
+            Sudoku sSudokuCopied = new Sudoku();
 
             for (int i = 0; i < p_sSudokuToCopy.SudokuSize; i++)
             {
                 for (int j = 0; j < p_sSudokuToCopy.SudokuSize; j++)
                 {
-                    sSudokuCopy.SudokuGrid[i, j] = new Cell(p_sSudokuToCopy.SudokuGrid[i, j]);
+                    sSudokuCopied.SudokuGrid[i, j] = new Cell(p_sSudokuToCopy.SudokuGrid[i, j]);
                 }
             }
-            sSudokuCopy.StartingValuesCoordinate = p_sSudokuToCopy.StartingValuesCoordinate;
+            sSudokuCopied.StartingValuesCoordinate = p_sSudokuToCopy.StartingValuesCoordinate;
 
-            return sSudokuCopy;
+            return sSudokuCopied;
+        }
+
+        /// <summary>
+        /// Return the list of possible values for a given cell.
+        /// </summary>
+        /// <param name="p_sSudoku"> The Sudoku to consider. </param>
+        /// <param name="p_cCellCoordinate"> The coordinates of the given cell. </param>
+        /// <returns></returns>
+        private static List<int> ComputePossibleValues(Sudoku p_sSudoku, Coordinate p_cCellCoordinate)
+        {
+            // Find the constraints imposed by the peers.
+            List<int> liConstraintValues = new List<int>();
+
+            for (int i = 0; i < p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].Peers.Count; i++)
+            {
+                liConstraintValues.Add(p_sSudoku.SudokuGrid[p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].Peers[i].Row,
+                    p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].Peers[i].Column].CellValue);
+            }
+
+            // COmpare
+            List<int> liPossibleValues = new List<int>();
+
+            for (int i = 0; i < p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].PossibleValues.Count; i++)
+            {
+                if (!(liConstraintValues.Contains(p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].PossibleValues[i])))
+                {
+                    liPossibleValues.Add(p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].PossibleValues[i]);
+                }
+            }
+
+            return liPossibleValues;
+        }
+
+        /// <summary>
+        /// Look for the next unassigned cell.
+        /// </summary>
+        /// <param name="p_sSudoku"> The Sudoku to consider. </param>
+        /// <returns> The coordinates of the first unassigned cell. </returns>
+        private static Coordinate FirstUnassignedCell(Sudoku p_sSudoku)
+        {
+            for (int i = 0; i < p_sSudoku.SudokuSize; i++)
+            {
+                for (int j = 0; j < p_sSudoku.SudokuSize; j++)
+                {
+                    if (!(p_sSudoku.SudokuGrid[i, j].Assigned))
+                    {
+                        return new Coordinate(i, j);
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -174,41 +239,39 @@ namespace SudokuCSP
         /// <summary>
         /// Run a backtracking search on a given sudoku.
         /// </summary>
-        /// <param name="p_sSudoku"> The sudoku to solve. </param>
+        /// <param name="p_sSudokuToSolve"> The sudoku to solve. </param>
         /// <returns> The resulting sudoku, solved or not. </returns>
-        public static Sudoku BacktrackingSearch(Sudoku p_sSudoku)
+        public static Sudoku BacktrackingSearch(Sudoku p_sSudokuToSolve)
         {
             Sudoku sSudoku;
 
-            if (p_sSudoku == null)
+            if (p_sSudokuToSolve == null)
             {
                 return null;
             }
-            if (IsFinished(p_sSudoku))
+            if (IsSolved(p_sSudokuToSolve))
             {
-                return p_sSudoku;
+                return p_sSudokuToSolve;
             }
 
-            Coordinate cUnassignedVariableCoord = MinimumRemainingValue(p_sSudoku);
+            Coordinate cUnassignedVariableCoord = MinimumRemainingValue(p_sSudokuToSolve);
 
-            while (p_sSudoku.SudokuGrid[cUnassignedVariableCoord.Row, cUnassignedVariableCoord.Column].PossibleValues.Count > 0)
+            while (p_sSudokuToSolve.SudokuGrid[cUnassignedVariableCoord.Row, cUnassignedVariableCoord.Column].PossibleValues.Count > 0)
             {
-                int iValue = ValueWithLeastConstraint(p_sSudoku, cUnassignedVariableCoord);
-                sSudoku = BacktrackingSearch(AssignValueFC(Clone(p_sSudoku), cUnassignedVariableCoord, iValue));
-                if (sSudoku != null)
+                int iValue = ValueWithLeastConstraint(p_sSudokuToSolve, cUnassignedVariableCoord);
+                if (ComputePossibleValues(p_sSudokuToSolve, cUnassignedVariableCoord).Contains(iValue))
                 {
-                    return sSudoku;
+                    sSudoku = BacktrackingSearch(AssignValueFC(Clone(p_sSudokuToSolve), cUnassignedVariableCoord, iValue));
+                    if (sSudoku != null)
+                    {
+                        return sSudoku;
+                    }
                 }
 
-                p_sSudoku = RemoveValueFC(p_sSudoku, cUnassignedVariableCoord, iValue);
-                if (p_sSudoku == null)
-                {
-                    return null;
-                }
                 m_iBacktrackNumber++;
+                p_sSudokuToSolve = RemoveValueFC(p_sSudokuToSolve, cUnassignedVariableCoord, iValue);
             }
             return null;
-
         }
 
     }
