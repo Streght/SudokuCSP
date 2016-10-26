@@ -1,2 +1,2 @@
 @echo off
-start /d "SudokuCSP Executable" SudokuCSP.exe
+start /d "SudokuCSP_Executable" SudokuCSP.exe

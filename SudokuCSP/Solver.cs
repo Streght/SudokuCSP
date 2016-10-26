@@ -139,16 +139,16 @@ namespace SudokuCSP
         /// <returns> The first cell with a minimum number of possible values. </returns>
         private static Coordinate CellWithMinimumRemainingValue(Sudoku p_sSudoku)
         {
-            int iCurrentMinPossibleValue = p_sSudoku.SudokuSize + 1;
+            int iCurrentMinRemainingValue = p_sSudoku.SudokuSize + 1;
             Coordinate cResult = new Coordinate();
 
             for (int i = 0; i < p_sSudoku.SudokuSize; i++)
             {
                 for (int j = 0; j < p_sSudoku.SudokuSize; j++)
                 {
-                    if ((p_sSudoku.SudokuGrid[i, j].PossibleValues.Count < iCurrentMinPossibleValue) && (!(p_sSudoku.SudokuGrid[i, j].Assigned)))
+                    if ((p_sSudoku.SudokuGrid[i, j].PossibleValues.Count < iCurrentMinRemainingValue) && (!(p_sSudoku.SudokuGrid[i, j].Assigned)))
                     {
-                        iCurrentMinPossibleValue = p_sSudoku.SudokuGrid[i, j].PossibleValues.Count;
+                        iCurrentMinRemainingValue = p_sSudoku.SudokuGrid[i, j].PossibleValues.Count;
                         cResult.Row = i;
                         cResult.Column = j;
                     }

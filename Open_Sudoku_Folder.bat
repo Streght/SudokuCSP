@@ -1,2 +1,2 @@
 @echo off
-%SystemRoot%\explorer.exe "SudokuCSP Executable\SudokuGrid"
+%SystemRoot%\explorer.exe "SudokuCSP_Executable\SudokuGrid"
