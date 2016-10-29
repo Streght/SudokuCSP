@@ -27,7 +27,6 @@
             {
                 m_iRow = value;
             }
-
         }
 
         /// <summary>
@@ -60,6 +59,6 @@
             m_iRow = p_iRow;
             m_iColumn = p_iColumn;
         }
-    }
 
+    }
 }

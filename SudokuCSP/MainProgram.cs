@@ -16,25 +16,51 @@ namespace SudokuCSP
         {
             while (true)
             {
+                Console.Write("Please enter the size of the Sudoku (9 for 9x9 or 16 for 16x16).\n");
+            RestartForWrongSize:;
+                string sConsoleString = Console.ReadLine();
+
                 // Create a new Sudoku to store the imported Sudoku.
-                Sudoku sSudoku = new Sudoku();
+                Sudoku sSudoku = null;
                 // Create a new sudiku to store the answer.
-                Sudoku sSudokuSolved = new Sudoku();
+                Sudoku sSudokuSolved = null;
+
+                if (Convert.ToInt32(sConsoleString) != 9 && Convert.ToInt32(sConsoleString) != 16)
+                {
+                    Console.Write("Wrong size of Sudoku, please enter the size of the Sudoku (9 for 9x9 or 16 for 16x16).\n");
+                    goto RestartForWrongSize;
+                }
+
+                switch (Convert.ToInt32(sConsoleString))
+                {
+                    case 9:
+                        sSudoku = new Sudoku(9);
+                        sSudokuSolved = new Sudoku(9);
+                        break;
+                    case 16:
+                        sSudoku = new Sudoku(16);
+                        sSudokuSolved = new Sudoku(16);
+                        break;
+                    default:
+                        break;
+                }
+
                 // Create a StopWatch to calculate how long it took to solve the Sudoku.
                 Stopwatch swStopWatch = new Stopwatch();
 
                 // Get the grid name from the console and 
                 Console.Write("Please enter the name of the Sudoku to solve (without the CSV extension) and press enter.\n");
-                string sSudokuName = Console.ReadLine();
-                sSudoku.ReadCSV(@"SudokuGrid\" + sSudokuName + ".csv");
+                sConsoleString = Console.ReadLine();
+                sSudoku.ReadCSV(@"SudokuGrid\" + sConsoleString + ".csv");
                 // For quick tests purposes.
-                //sSudoku.ReadCSV(@"SudokuGrid\SudokuHardest.csv");
+                //sSudoku.ReadCSV(@"SudokuGrid\Sudoku9Hard.csv");
 
                 // Display the starting Sudoku on the console.
                 Console.Write("\nStarting Sudoku grid :\n");
                 sSudoku.PrintSudokuGrid();
                 Console.Write("Start solving ? Press enter...\n");
                 Console.ReadKey(true);
+                sSudoku.NotAtStart = true;
 
                 // Start the StopWatch.
                 swStopWatch.Start();
@@ -73,5 +99,6 @@ namespace SudokuCSP
                 }
             }
         }
+
     }
 }

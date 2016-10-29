@@ -99,7 +99,7 @@ namespace SudokuCSP
             m_iCellValue = p_cCellToCopy.m_iCellValue;
             m_bAssigned = p_cCellToCopy.m_bAssigned;
 
-            // COpy the cell's peers.
+            // Copy the cell's peers.
             for (int i = 0; i < p_cCellToCopy.m_lcPeers.Count; i++)
             {
                 m_lcPeers.Add(p_cCellToCopy.m_lcPeers[i]);

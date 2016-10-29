@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace SudokuCSP
@@ -13,6 +12,10 @@ namespace SudokuCSP
         /// Variable used to keep track of the number of backtrack performed.
         /// </summary>
         private static int m_iBacktrackNumber = 0;
+        /// <summary>
+        /// Index used to compute the step number.
+        /// </summary>
+        //private static int m_iStepIndex = 0;
 
         /// <summary>
         /// Get the number of backtrack performed.
@@ -67,7 +70,7 @@ namespace SudokuCSP
         /// <returns> A copy of the given Sudoku. </returns>
         private static Sudoku Clone(Sudoku p_sSudokuToCopy)
         {
-            Sudoku sSudokuCopied = new Sudoku();
+            Sudoku sSudokuCopied = new Sudoku(p_sSudokuToCopy.SudokuSize);
 
             for (int i = 0; i < p_sSudokuToCopy.SudokuSize; i++)
             {
@@ -77,8 +80,38 @@ namespace SudokuCSP
                 }
             }
             sSudokuCopied.StartingValuesCoordinate = p_sSudokuToCopy.StartingValuesCoordinate;
+            sSudokuCopied.NotAtStart = p_sSudokuToCopy.NotAtStart;
 
             return sSudokuCopied;
+        }
+
+        /// <summary>
+        /// Optimize the algorithm by cleaning the list of possible values for each cell with the already assigned cells at start.
+        /// </summary>
+        /// <param name="p_sSudoku"> The Sudoku to consider. </param>
+        /// <param name="p_cCellCoordinate"> The coordinates of the given cell. </param>
+        /// <returns> The list of possible values without the peers cells values. </returns>
+        public static List<int> CleanPossibleValuesAtStart(Sudoku p_sSudoku, Coordinate p_cCellCoordinate)
+        {
+            // Find the constraints imposed by the peers.
+            List<int> liConstraintValues = new List<int>();
+
+            for (int i = 0; i < p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].Peers.Count; i++)
+            {
+                liConstraintValues.Add(p_sSudoku.SudokuGrid[p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].Peers[i].Row,
+                    p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].Peers[i].Column].CellValue);
+            }
+
+            // Compare the list of possible values with the list of constraints imposed by the peers.
+            List<int> liPossibleValues = new List<int>();
+            for (int i = 1; i < p_sSudoku.SudokuSize + 1; i++)
+            {
+                if (!(liConstraintValues.Contains(i)))
+                {
+                    liPossibleValues.Add(i);
+                }
+            }
+            return liPossibleValues;
         }
 
         /// <summary>
@@ -86,7 +119,7 @@ namespace SudokuCSP
         /// </summary>
         /// <param name="p_sSudoku"> The Sudoku to consider. </param>
         /// <param name="p_cCellCoordinate"> The coordinates of the given cell. </param>
-        /// <returns></returns>
+        /// <returns> The list of possible values for a given cell. </returns>
         private static List<int> ComputePossibleValues(Sudoku p_sSudoku, Coordinate p_cCellCoordinate)
         {
             // Find the constraints imposed by the peers.
@@ -98,7 +131,7 @@ namespace SudokuCSP
                     p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].Peers[i].Column].CellValue);
             }
 
-            // COmpare
+            // Compare the list of possible values with the constraints imposed by the peers.
             List<int> liPossibleValues = new List<int>();
 
             for (int i = 0; i < p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].PossibleValues.Count; i++)
@@ -191,7 +224,7 @@ namespace SudokuCSP
                 }
             }
             return p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].PossibleValues[aiConstraintCountForValues.ToList().IndexOf(
-                aiConstraintCountForValues.ToList().Max())];
+                aiConstraintCountForValues.ToList().Min())];
         }
 
         /// <summary>
@@ -236,6 +269,14 @@ namespace SudokuCSP
             // If the value doesn't leave a peer without possible value, assign this value to the given cell.
             p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].CellValue = p_iValue;
             p_sSudoku.SudokuGrid[p_cCoordinate.Row, p_cCoordinate.Column].Assigned = true;
+
+            /* Code used to display the steps in the console.
+            Console.SetCursorPosition(0, 0);
+            Console.Write("Step number " + index + " :\n");
+            p_sSudoku.PrintSudokuGrid();
+            Console.Write("\n");
+            index++;
+            */
             return p_sSudoku;
         }
 
@@ -277,7 +318,7 @@ namespace SudokuCSP
                         return sBacktrackResultingSudoku;
                     }
                 }
-                
+
                 // if the peers update failed, i.e. if one peer is not assigned and has no possible values remaining.
                 // m_iBacktrackNumber is used to keep track of the count of backtracks.
                 m_iBacktrackNumber++;
