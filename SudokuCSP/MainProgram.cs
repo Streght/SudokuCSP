@@ -16,7 +16,7 @@ namespace SudokuCSP
         {
             while (true)
             {
-                Console.Write("Please enter the size of the Sudoku (9 for 9x9 or 16 for 16x16).\n");
+                Console.Write("Please enter the size of the Sudoku (9 for 9x9 or 16 for 16x16), the Sudoku must have a square shape.\n");
             RestartForWrongSize:;
                 string sConsoleString = Console.ReadLine();
 
@@ -25,7 +25,7 @@ namespace SudokuCSP
                 // Create a new sudiku to store the answer.
                 Sudoku sSudokuSolved = null;
 
-                if (Convert.ToInt32(sConsoleString) != 9 && Convert.ToInt32(sConsoleString) != 16)
+                if ((Math.Sqrt(Convert.ToInt32(sConsoleString)) - Math.Truncate(Math.Sqrt(Convert.ToInt32(sConsoleString)))) != 0)
                 {
                     Console.Write("Wrong size of Sudoku, please enter the size of the Sudoku (9 for 9x9 or 16 for 16x16).\n");
                     goto RestartForWrongSize;

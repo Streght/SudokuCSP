@@ -26,10 +26,6 @@ namespace SudokuCSP
         /// </summary>
         private List<Coordinate> m_lcStartingValuesCoordinate = new List<Coordinate>();
         /// <summary>
-        /// The list of the possible values for an unassigned cell at start.
-        /// </summary>
-        private List<int> m_liPossibleValueAtStart = new List<int>();
-        /// <summary>
         /// The list of coordinate stored by region.
         /// </summary>
         private List<Coordinate>[,] m_lcRegionPeers = null;
@@ -187,15 +183,12 @@ namespace SudokuCSP
         /// </summary>
         public void PrintSudokuGrid()
         {
-            string sLineSeparator = "";
-            if (m_iSudokuSize == 9)
+            string sLineSeparator = "+";
+            for(int i = 0; i < Math.Sqrt(m_iSudokuSize); i++)
             {
-                sLineSeparator = "+-------";
+                sLineSeparator = sLineSeparator + "--";
             }
-            if (m_iSudokuSize == 16)
-            {
-                sLineSeparator = "+---------";
-            }
+            sLineSeparator = sLineSeparator + "-";
 
             if (m_aiSudokuGrid != null)
             {
