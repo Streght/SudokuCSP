@@ -224,7 +224,7 @@ namespace SudokuCSP
                 }
             }
             return p_sSudoku.SudokuGrid[p_cCellCoordinate.Row, p_cCellCoordinate.Column].PossibleValues[aiConstraintCountForValues.ToList().IndexOf(
-                aiConstraintCountForValues.ToList().Min())];
+                aiConstraintCountForValues.ToList().Max())];
         }
 
         /// <summary>

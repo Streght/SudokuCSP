@@ -122,6 +122,10 @@ namespace SudokuCSP
                     m_acValueToDisplay = new char[16] { '1', '2', '3', '4', '5', '6', '7', '8', '9',
                         'A', 'B', 'C', 'D', 'E', 'F', 'G' };
                     break;
+                case 25:
+                    m_acValueToDisplay = new char[25] { '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P' };
+                    break;
                 default:
                     break;
             }
@@ -184,7 +188,7 @@ namespace SudokuCSP
         public void PrintSudokuGrid()
         {
             string sLineSeparator = "+";
-            for(int i = 0; i < Math.Sqrt(m_iSudokuSize); i++)
+            for (int i = 0; i < Math.Sqrt(m_iSudokuSize); i++)
             {
                 sLineSeparator = sLineSeparator + "--";
             }
@@ -220,6 +224,16 @@ namespace SudokuCSP
                             {
                                 Console.ForegroundColor = ConsoleColor.Red;
                                 Console.Write(" " + m_acValueToDisplay[m_aiSudokuGrid[i, j].CellValue - 1].ToString());
+                                /* Code to display full number instead of letters
+                                if (m_aiSudokuGrid[i, j].CellValue <10) {
+                                    
+                                    Console.Write("  " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                }
+                                else
+                                {
+                                    Console.Write(" " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                }
+                                */
                                 Console.ResetColor();
                             }
                             else
@@ -234,6 +248,16 @@ namespace SudokuCSP
                                     {
                                         Console.ForegroundColor = ConsoleColor.Red;
                                         Console.Write(" " + m_acValueToDisplay[m_aiSudokuGrid[i, j].CellValue - 1].ToString());
+                                        /* Code to display full number instead of letters.
+                                        if (m_aiSudokuGrid[i, j].CellValue < 10)
+                                        {
+                                            Console.Write("  " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                        }
+                                        else
+                                        {
+                                            Console.Write(" " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                        }
+                                        */
                                         Console.ResetColor();
                                         bFlagStartingValue = true;
                                         break;
@@ -245,6 +269,16 @@ namespace SudokuCSP
                                 {
                                     Console.ForegroundColor = ConsoleColor.Green;
                                     Console.Write(" " + m_acValueToDisplay[m_aiSudokuGrid[i, j].CellValue - 1].ToString());
+                                    /* Code to display full number instead of letters.
+                                    if (m_aiSudokuGrid[i, j].CellValue < 10)
+                                    {
+                                        Console.Write("  " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                    }
+                                    else
+                                    {
+                                        Console.Write(" " + m_aiSudokuGrid[i, j].CellValue.ToString());
+                                    }
+                                    */
                                     Console.ResetColor();
                                 }
                             }

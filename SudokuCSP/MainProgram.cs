@@ -16,33 +16,27 @@ namespace SudokuCSP
         {
             while (true)
             {
-                Console.Write("Please enter the size of the Sudoku (9 for 9x9 or 16 for 16x16), the Sudoku must have a square shape.\n");
+                Console.Write("Please enter the size of the Sudoku (9 for 9x9 and 16 for 16x16), the Sudoku must have a square shape.\n");
             RestartForWrongSize:;
                 string sConsoleString = Console.ReadLine();
+                // For quick tests purposes.
+                //string sConsoleString = Convert.ToString(9);
 
                 // Create a new Sudoku to store the imported Sudoku.
                 Sudoku sSudoku = null;
                 // Create a new sudiku to store the answer.
                 Sudoku sSudokuSolved = null;
 
-                if ((Math.Sqrt(Convert.ToInt32(sConsoleString)) - Math.Truncate(Math.Sqrt(Convert.ToInt32(sConsoleString)))) != 0)
+                if (((Math.Sqrt(Convert.ToInt32(sConsoleString)) - Math.Truncate(Math.Sqrt(Convert.ToInt32(sConsoleString)))) != 0) || 
+                    ((Convert.ToInt32(sConsoleString) > 16) && (Math.Sqrt(Convert.ToInt32(sConsoleString)) < 9)))
                 {
-                    Console.Write("Wrong size of Sudoku, please enter the size of the Sudoku (9 for 9x9 or 16 for 16x16).\n");
+                    Console.Write("Wrong size of Sudoku, please enter the size of the Sudoku (9 for 9x9 and 16 for 16x16).\n");
                     goto RestartForWrongSize;
                 }
-
-                switch (Convert.ToInt32(sConsoleString))
+                else
                 {
-                    case 9:
-                        sSudoku = new Sudoku(9);
-                        sSudokuSolved = new Sudoku(9);
-                        break;
-                    case 16:
-                        sSudoku = new Sudoku(16);
-                        sSudokuSolved = new Sudoku(16);
-                        break;
-                    default:
-                        break;
+                    sSudoku = new Sudoku(Convert.ToInt32(sConsoleString));
+                    sSudokuSolved = new Sudoku(Convert.ToInt32(sConsoleString));
                 }
 
                 // Create a StopWatch to calculate how long it took to solve the Sudoku.
@@ -53,7 +47,7 @@ namespace SudokuCSP
                 sConsoleString = Console.ReadLine();
                 sSudoku.ReadCSV(@"SudokuGrid\" + sConsoleString + ".csv");
                 // For quick tests purposes.
-                //sSudoku.ReadCSV(@"SudokuGrid\Sudoku9Hard.csv");
+                //sSudoku.ReadCSV(@"SudokuGrid\Sudoku8Hardest.csv");
 
                 // Display the starting Sudoku on the console.
                 Console.Write("\nStarting Sudoku grid :\n");
